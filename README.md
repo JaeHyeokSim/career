@@ -176,7 +176,7 @@ PG 교체는 "설정 값만 바꾸면 되는 작업"처럼 보였지만
 
 ### sourcing-pipeline — https://github.com/JaeHyeokSim/sourcing-pipeline
 
-`Java 21` `Spring Boot 4.1` `Spring Data JPA` `Chrome Extension MV3` `JUnit 5`
+`Java 21` `Spring Boot 4.1` `Spring Data JPA` `Flyway` `PostgreSQL` `Chrome Extension MV3` `JUnit 5`
 
 위 실무 경험에서 반복해 마주친 문제들을 **Spring 기반으로 처음부터 재설계**한 프로젝트.
 회사 코드를 옮기지 않고 문제 정의부터 다시 시작했습니다.
@@ -191,6 +191,9 @@ PG 교체는 "설정 값만 바꾸면 되는 작업"처럼 보였지만
 - 마켓 호출은 트랜잭션 밖에서 수행 (준비·커밋 → 호출 → 결과 반영)
 - 페이로드 해시가 직전과 같으면 재전송 요청이 와도 마켓을 호출하지 않음 (중복 등록 방지)
 - 마켓이 성공 응답에 상품ID를 비워 보내면 성공으로 기록하지 않음
+- 수집·등록 현황을 한 화면에서 보는 대시보드 (상태별 건수, 실패 사유, 정체 작업)
+- 스키마는 Flyway 로 관리하고 **개발 H2 / 운영 PostgreSQL** 프로파일 분리.
+  두 엔진에서 갈리는 타입(네이티브 enum, 라지 오브젝트)은 실제 PostgreSQL 을 띄우는 테스트로 고정
 
 **직접 잡은 결함**
 정규화 실패를 예외로 던졌더니 같은 트랜잭션에서 기록한 실패 상태가 함께 롤백되어,
@@ -200,8 +203,8 @@ PG 교체는 "설정 값만 바꾸면 되는 작업"처럼 보였지만
 반환값(sealed interface + record) 기반으로 바꿔 상태가 반드시 커밋되게 하고,
 회귀 테스트는 **일부러 트랜잭션 없이** 작성했습니다.
 
-테스트 47건 (큐 상태 전이, 정규화 규칙, 수집 플로우, 마켓 규칙·판매가 계산,
-등록 플로우, 트랜잭션 경계 회귀).
+테스트 50건 (큐 상태 전이, 정규화 규칙, 수집 플로우, 마켓 규칙·판매가 계산,
+등록 플로우, 트랜잭션 경계 회귀, PostgreSQL 스키마).
 
 ---
 
@@ -211,5 +214,5 @@ PG 교체는 "설정 값만 바꾸면 되는 작업"처럼 보였지만
 |---|---|
 | 언어 | Java, PHP, JavaScript(ES2020+), SQL |
 | 프레임워크 | Spring Boot, Spring Data JPA |
-| 데이터베이스 | MySQL, H2 |
-| 기타 | Chrome Extension MV3, Linux, Cron, Gradle, Git, Playwright |
+| 데이터베이스 | MySQL, PostgreSQL, H2 |
+| 기타 | Chrome Extension MV3, Flyway, Linux, Cron, Gradle, Git, Playwright |
